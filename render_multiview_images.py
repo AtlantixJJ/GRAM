@@ -26,9 +26,13 @@ if __name__ == '__main__':
     parser.add_argument('--output_dir', type=str, default='./experiments/multiview_images/FFHQ_default')
     parser.add_argument('--config', type=str, default='FFHQ_default')
     parser.add_argument('--seeds', type=parse_idx_range, default='0-19')
-    parser.add_argument('--frames', type=str, default=30)
-    parser.add_argument('--psi', type=str, default=0.7)
-    parser.add_argument('--no_watermark', default=False, help='True to eliminate watermarks. default=False.', action='store_true')
+    parser.add_argument('--frames', type=str, default=60)
+    parser.add_argument('--psi', type=str, default=1.0)
+    parser.add_argument('--yaw', type=float, default=1.0,
+                        help="The range of yaw.")
+    parser.add_argument('--pitch', type=float, default=0.2,
+                        help="The range of pitch.")
+    parser.add_argument('--no_watermark', default=True, help='True to eliminate watermarks. default=False.', action='store_true')
     opt = parser.parse_args()
 
     config = getattr(configs, opt.config)
@@ -63,8 +67,9 @@ if __name__ == '__main__':
         generator.renderer.lock_view_dependence = True
         frames = opt.frames
         concat = None
-        face_yaws = list(np.linspace(-0.4, 0.4, frames // 2 + 1)[:-1]) + list(np.linspace(0.4, -0.4, frames // 2 + 1)[:-1])
-        face_pitchs = [0*np.pi] * frames
+        face_yaws = list(np.linspace(-opt.yaw, opt.yaw, frames // 2 + 1)[:-1]) + list(np.linspace(opt.yaw, -opt.yaw, frames // 2 + 1)[:-1])
+        #face_pitchs = [0*np.pi] * frames
+        face_pitchs = list(np.linspace(-opt.pitch, opt.pitch, frames // 2 + 1)[:-1]) + list(np.linspace(opt.pitch, -opt.pitch, frames // 2 + 1)[:-1])
         face_angles = [[a + v_mean, b + h_mean] for a, b in zip(face_pitchs, face_yaws)]
         fovs = [12] * frames
     elif setting == 2:   # CARLA
